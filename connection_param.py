@@ -1,5 +1,7 @@
 import paramiko
 import psycopg2
+
+
 class SSHConnection():
     """
     This class created for contain information about host, user, password (secret), port. For stable work use AstraLinux
@@ -8,12 +10,14 @@ class SSHConnection():
      daemon config file by 'sudo tee' or 'bash -c'. It's not working one of twice repeat on clear snapshot of virtual
      machine.
     """
+    
     host = ''
     user = 'root'
     secret = ''
     port = 22
     path='/root/'
     client = paramiko.SSHClient()
+    
     def connection_sql(self):
         """This function need for testing connection to Postgresql. It can make connect and get version of Postgresql"""
         try:
@@ -43,6 +47,7 @@ class SSHConnection():
         except (Exception, psycopg2.DatabaseError) as error:
                 print(error)
                 exit(-1)
+            
     def get_con_param(self):
         """This function take information by user"""
         host = input("Enter ip4 address or DNS name: ")
@@ -65,6 +70,7 @@ class SSHConnection():
                 except ValueError:
                     port = input("Port must be integer. Enter port: ")
             self.port = int(port)
+            
     def get_connection(self):
         """This function try to connect to the host and make test command"""
         print("=========TEST HOST CONNECTION=========")
@@ -86,6 +92,7 @@ class SSHConnection():
             self.client.close()
             exit(-1)
         self.client.close()
+        
     def redos_connection(self):
         """This function used for setup Postgresql on RedOS"""
 
@@ -151,13 +158,11 @@ class SSHConnection():
         stdin, stdout, stderr = self.client.exec_command('systemctl enable postgres.service')
         print("=========START POSTGRESQL.SERVICE=========")
         stdin, stdout, stderr = self.client.exec_command('systemctl start postgres.service')
-
-
-
         self.connection_sql()
         #IF you need to test autostart of deamon, you should uncomment this line:
         #stdin, stdout, stderr = self.client.exec_command("reboot")
         self.client.close()
+        
     def astra_connection(self):
         self.client.connect(hostname=self.host, username=self.user, password=self.secret, port=self.port)
         print("=========INSTALL WGET=========")
@@ -232,7 +237,6 @@ class SSHConnection():
         stdin, stdout, stderr = self.client.exec_command('sudo systemctl start postgres.service')
         data = stdout.read() + stderr.read()
         print(data)
-
         self.connection_sql()
         #IF you need to test autostart of deamon, you should uncomment this line:
         #stdin, stdout, stderr = self.client.exec_command("sudo reboot")
